@@ -1,0 +1,9 @@
+{
+  "name": "bot-do-or-not",
+  "version": "1.0.0",
+  "description": "BotDoOrNot",
+  "main": "exsperDoOrNot.js",
+  "author": {
+    "name": "Exsper"
+  }
+}
