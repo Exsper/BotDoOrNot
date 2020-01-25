@@ -20,13 +20,16 @@ function LookForTheSame(s1, s2) {
     }
     // 寻找重复部分
     for (let i = 0; i < s1length; ++i) {
-        if (s1[i] === s2[0]) start = i; // 找到相同点，开始核对
-        for (let j = 1; j < s2length; ++j) {
-            if (i + j >= s1length) { // s1到句末，核对结束
-                return start;
-            }
-            else if (s1[i + j] !== s2[j]) { // 核对中出现不同字符，不是重复部分
-                break;
+        //console.log(s1[i]);
+        if (s1[i] === s2[0]) {
+            start = i; // 找到相同点，开始核对
+            for (let j = 1; j < s2length; ++j) {
+                if (i + j >= s1length) { // s1到句末，核对结束
+                    return start;
+                }
+                else if (s1[i + j] !== s2[j]) { // 核对中出现不同字符，不是重复部分
+                    break;
+                }
             }
         }
         // s2到句末，s1没到句末，不是重复部分
