@@ -157,6 +157,9 @@ module.exports.apply = (ctx) => {
     });
 };
 
+
+/* test
+
 let readline = require('readline');
 const rl = readline.createInterface({
     input: process.stdin,
@@ -173,3 +176,5 @@ rl.on('line', function (line) {
         }
     }
 });
+
+*/
