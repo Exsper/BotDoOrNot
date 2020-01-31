@@ -2,33 +2,33 @@
 
 function ReplyObject(ask) {
     this.reply = true;
-    this.ask = ask
-    this.format = function() {
+    this.ask = ask;
+    this.format = function () {
         if (this.choices.length > 0)
             return this.choices[Math.floor(Math.random() * this.choices.length)];
         else return undefined;
-    }
+    };
 }
-ReplyObject.prototype.choices = function(choices) {
+ReplyObject.prototype.choices = function (choices) {
     this.choices = choices;
     return this;
-}
-ReplyObject.prototype.format = function(format) {
+};
+ReplyObject.prototype.format = function (format) {
     this.format = format;
     return this;
-}
-ReplyObject.prototype.toString = function() {
-    if (typeof this.format == 'function') {
+};
+ReplyObject.prototype.toString = function () {
+    if (typeof this.format === 'function') {
         return this.format();
     } else {
         //default action: return undefined
         return undefined;
     }
-}
-ReplyObject.prototype.no = function(){
+};
+ReplyObject.prototype.no = function () {
     this.reply = false;
     return this;
-}
+};
 /**
  * 寻找s1的末尾和s2的开头的重复部分
  * @param {string} s1 字符串aaabb
@@ -36,8 +36,8 @@ ReplyObject.prototype.no = function(){
  * @return {int} 重复部分在s1的起始点 
  */
 function LookForTheSame(s1, s2) {
-    let s1length = s1.length;
-    let s2length = s2.length;
+    const s1length = s1.length;
+    const s2length = s2.length;
 
     if (s1length <= 0 || s2length <= 0) return -1;
 
@@ -66,11 +66,11 @@ function Reply(s) {
     // 排除过长和过短消息
     if (s.length > 30 || s.length < 4) return reply.no();
 
-    const ask = s.substring(1);
+    const ask = s.substring(1).trim();
     let asklength = ask.length;
 
     // 获取所有“不”的位置
-    const arrOr = ask.split("").map((word, index) => { if (word === '不') return index; }).filter(e => e !== undefined)
+    const arrOr = ask.split("").map((word, index) => { if (word === '不') return index; }).filter(e => e !== undefined);
 
 
     // 删除头尾的“不”
@@ -92,14 +92,14 @@ function Reply(s) {
     }, {
         not: [],
         start: [],
-        length: [],
+        length: []
     });
     if (possible.not.length <= 0) return reply.no();
 
 
     // 极端情况： aaabbb不bbbccc不bbbcccddd
     // 一般取最长的那个，如果都一样长那就取最后一个好了
-    const indexOfMax = possible.length.indexOf(Math.max(...possible.length));
+    const indexOfMax = possible.length.lastIndexOf(Math.max(...possible.length));
 
     const doStart = possible.start[indexOfMax];
     const notIndex = possible.not[indexOfMax];
@@ -111,12 +111,12 @@ function Reply(s) {
     // 今天晚上 [要] 不 [要] 吃饭 = 回答：[要]吃饭/不[要]吃饭
     // 今天晚上 [吃饭] 不 [吃饭] = 回答：[吃饭]/不[吃饭]
     const doString = ask.substring(doStart, notIndex);
-    let endString = (notIndex + doLength + 1 < asklength) ? ask.substring(notIndex + doLength + 1) : "";
+    let endString = notIndex + doLength + 1 < asklength ? ask.substring(notIndex + doLength + 1) : "";
 
 
     // 细节处理
     // 重复词有“！”视为恶意代码，不作回应（没人会用"学!code不学!code"聊天吧）
-    if (endString.includes("!") || endString.includes("！")) return reply.no();
+    if (doString.includes("!") || doString.includes("！")) return reply.no();
     // 结束词包含疑问词/符号，取符号前的语句
     if (endString.length > 0) {
         const endStringRegex = /(.*?)(?=\?|？|!|！|,|，|\.|。|呢)+/;
@@ -129,10 +129,10 @@ function Reply(s) {
     //输出
     let replyString = doString + endString;
     // 将“我”改成“你”，“你”改成“我”
-    let replyStringFix = replyString.split("").map(char => (char == '我') ? '你' : (char == '你' ? '我' : char)).join("");
+    let replyStringFix = replyString.split("").map(char => (char === '我') ? '你' : (char === '你' ? '我' : char)).join("");
 
-    reply.choices = [replyStringFix,`不${replyStringFix}`]
-    return reply
+    reply.choices = [replyStringFix, `不${replyStringFix}`];
+    return reply;
 }
 
 // Koishi插件名
@@ -156,3 +156,20 @@ module.exports.apply = (ctx) => {
         }
     });
 };
+
+let readline = require('readline');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+rl.on('line', function (line) {
+    let ask = line;
+    if (ask.substring(0, 1) === "!" || ask.substring(0, 1) === "！") {
+        try {
+            let replyString = Reply(ask.trim());
+            if (replyString.reply) return console.log(replyString.toString());
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
+});
