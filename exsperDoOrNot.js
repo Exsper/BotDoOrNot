@@ -1,6 +1,7 @@
 'use strict';
 
 function ReplyObject(ask) {
+    this.reply = true;
     this.ask = ask
     this.format = function() {
         if (this.choices.length > 0)
@@ -23,6 +24,10 @@ ReplyObject.prototype.toString = function() {
         //default action: return undefined
         return undefined;
     }
+}
+ReplyObject.prototype.no = function(){
+    this.reply = false;
+    return this;
 }
 /**
  * 寻找s1的末尾和s2的开头的重复部分
@@ -57,9 +62,9 @@ function Reply(s) {
     const reply = new ReplyObject(s);
     // 排除不含“不”的消息
     // 排除含有“不不”的消息（应该不是询问选择的）
-    if (!s.includes("不") || s.includes("不不")) return reply;
+    if (!s.includes("不") || s.includes("不不")) return reply.no();
     // 排除过长和过短消息
-    if (s.length > 30 || s.length < 4) return reply;
+    if (s.length > 30 || s.length < 4) return reply.no();
 
     const ask = s.substring(1);
     let asklength = ask.length;
@@ -89,7 +94,7 @@ function Reply(s) {
         start: [],
         length: [],
     });
-    if (possible.not.length <= 0) return reply;
+    if (possible.not.length <= 0) return reply.no();
 
 
     // 极端情况： aaabbb不bbbccc不bbbcccddd
@@ -111,7 +116,7 @@ function Reply(s) {
 
     // 细节处理
     // 重复词有“！”视为恶意代码，不作回应（没人会用"学!code不学!code"聊天吧）
-    if (endString.includes("!") || endString.includes("！")) return reply;
+    if (endString.includes("!") || endString.includes("！")) return reply.no();
     // 结束词包含疑问词/符号，取符号前的语句
     if (endString.length > 0) {
         const endStringRegex = /(.*?)(?=\?|？|!|！|,|，|\.|。|呢)+/;
@@ -139,9 +144,9 @@ module.exports.apply = (ctx) => {
         let ask = meta.message;
         if (ask.substring(0, 1) === "!" || ask.substring(0, 1) === "！") {
             try {
-                let replyString = Reply(ask.trim()).toString();
-                if (!replyString) return next();
-                else return meta.$send(replyString);
+                let replyString = Reply(ask.trim());
+                if (!replyString.reply) return next();
+                else return meta.$send(replyString.toString());
             } catch (ex) {
                 console.log(ex);
                 return next();
