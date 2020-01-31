@@ -52,7 +52,7 @@ function Reply(s) {
     }
     // 删除头尾的“不”
     if (arrOr[0] === 0) arrOr = arrOr.slice(1);
-    if (arrOr[arrOr.length] === 0) arrOr.pop();
+    if (arrOr[arrOr.length - 1] === 0) arrOr.pop();
     // 分析所有按“不”拆分情况，找出“不”两边有相同字符串的情况
     let possibleNot = [];
     let possibleStart = [];
