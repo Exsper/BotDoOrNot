@@ -131,12 +131,12 @@ function AorB(ask) {
 
 function DidOrNot(ask) {
     const reply = new ReplyObject(ask);
-    const singleWordAction = ["咬","吞","吐","吮","吸","啃","喝","吃","咀","嚼","噘","嘟","努","撇","看","望","瞥","视","盯","瞧","窥","瞄","眺","瞪","瞅","搀","抱","搂","扶","捉","擒","掐","推","拿","抽","撕","摘","拣","捡","打","播","击","捏","撒","按","弹","撞","提","扭","捶","持","揍","披","捣","搜","托","举","拖","擦","敲","挖","抛","掘","抬","插","扔","写","抄","抓","捧","掷","撑","摊","倒","摔","劈","画","搔","撬","挥","揽","挡","捺","抚","搡","拉","摸","拍","摇","剪","拎","拔","拧","拨","舞","握","攥","退","进","奔","跑","赶","趋","遁","逃","立","站","跨","踢","跳","走","蹬","窜","说","看","走","听","笑","拿","跑","吃","唱","喝","敲","坐","盯","踢","闻","摸","在","死","有","想","爱","恨","伯","是","为","乃","能","会","愿","肯","敢","要","配","上","下","进","出","回","开","过","起","来"]
+    const singleWordAction = ["咬", "吞", "吐", "吮", "吸", "啃", "喝", "吃", "咀", "嚼", "噘", "嘟", "努", "撇", "看", "望", "瞥", "视", "盯", "瞧", "窥", "瞄", "眺", "瞪", "瞅", "搀", "抱", "搂", "扶", "捉", "擒", "掐", "推", "拿", "抽", "撕", "摘", "拣", "捡", "打", "播", "击", "捏", "撒", "按", "弹", "撞", "提", "扭", "捶", "持", "揍", "披", "捣", "搜", "托", "举", "拖", "擦", "敲", "挖", "抛", "掘", "抬", "插", "扔", "写", "抄", "抓", "捧", "掷", "撑", "摊", "倒", "摔", "劈", "画", "搔", "撬", "挥", "揽", "挡", "捺", "抚", "搡", "拉", "摸", "拍", "摇", "剪", "拎", "拔", "拧", "拨", "舞", "握", "攥", "退", "进", "奔", "跑", "赶", "趋", "遁", "逃", "立", "站", "跨", "踢", "跳", "走", "蹬", "窜", "说", "看", "走", "听", "笑", "拿", "跑", "吃", "唱", "喝", "敲", "坐", "盯", "踢", "闻", "摸", "在", "死", "有", "想", "爱", "恨", "伯", "是", "为", "乃", "能", "会", "愿", "肯", "敢", "要", "配", "上", "下", "进", "出", "回", "开", "过", "起", "来"]
     const action = ask.match(/(?<action>.+)了[嘛吗](\?)?/);
     console.log(action);
-    if (action.groups.action.length == 2 && singleWordAction.includes(action.groups.action.slice(0,1))) reply.choices = [`${action.groups.action.slice(0,1)}了`,`没${action.groups.action.slice(0,1)}`];
-    else if (action.groups.action.length == 2) reply.choices = [`${action.groups.action}了`,`没${action.groups.action}`];
-    else reply.choices = [`${action.groups.action}了`,`没有`];
+    if (action.groups.action.length == 2 && singleWordAction.includes(action.groups.action.slice(0, 1))) reply.choices = [`${action.groups.action.slice(0,1)}了`, `没${action.groups.action.slice(0,1)}`];
+    else if (action.groups.action.length == 2) reply.choices = [`${action.groups.action}了`, `没${action.groups.action}`];
+    else reply.choices = [`${action.groups.action}了`, `没有`];
     return reply
 }
 
@@ -191,9 +191,14 @@ module.exports.apply = (ctx) => {
         let ask = meta.message;
         if (ask.substring(0, 1) === "!" || ask.substring(0, 1) === "！") {
             try {
-                let replyString = Reply(ask.trim().substring(1));
-                if (!replyString.reply) return next();
-                else return meta.$send(replyString.toString());
+                let str = ask.trim().substring(1);
+                let replyString = b.returnBuilderIfMatched(str);
+                console.log(replyString);
+                if (replyString) {
+                    return meta.$send(replyString(str).toString());
+                } else {
+                    return next();
+                }
             } catch (ex) {
                 console.log(ex);
                 return next();
