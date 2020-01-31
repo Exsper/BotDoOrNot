@@ -53,6 +53,10 @@ function LookForTheSame(s1, s2) {
 }
 
 
+function positionFlip(str){
+    return str.split("").map(char => (char == '我') ? '你' : (char == '你' ? '我' : char)).join("");
+}
+
 /**
  * 根据含“不”的选择性询问生成对应回复
  * @param {string} s 接受的消息
@@ -123,20 +127,55 @@ function AorB(ask) {
     //输出
     let replyString = doString + endString;
     // 将“我”改成“你”，“你”改成“我”
-    let replyStringFix = replyString.split("").map(char => (char == '我') ? '你' : (char == '你' ? '我' : char)).join("");
+    let replyStringFix = positionFlip(replyString)
 
     reply.choices = [replyStringFix, `不${replyStringFix}`]
     return reply
 }
 
-function DidOrNot(ask) {
+function DoOrNot(ask) {
     const reply = new ReplyObject(ask);
-    const singleWordAction = ["咬", "吞", "吐", "吮", "吸", "啃", "喝", "吃", "咀", "嚼", "噘", "嘟", "努", "撇", "看", "望", "瞥", "视", "盯", "瞧", "窥", "瞄", "眺", "瞪", "瞅", "搀", "抱", "搂", "扶", "捉", "擒", "掐", "推", "拿", "抽", "撕", "摘", "拣", "捡", "打", "播", "击", "捏", "撒", "按", "弹", "撞", "提", "扭", "捶", "持", "揍", "披", "捣", "搜", "托", "举", "拖", "擦", "敲", "挖", "抛", "掘", "抬", "插", "扔", "写", "抄", "抓", "捧", "掷", "撑", "摊", "倒", "摔", "劈", "画", "搔", "撬", "挥", "揽", "挡", "捺", "抚", "搡", "拉", "摸", "拍", "摇", "剪", "拎", "拔", "拧", "拨", "舞", "握", "攥", "退", "进", "奔", "跑", "赶", "趋", "遁", "逃", "立", "站", "跨", "踢", "跳", "走", "蹬", "窜", "说", "看", "走", "听", "笑", "拿", "跑", "吃", "唱", "喝", "敲", "坐", "盯", "踢", "闻", "摸", "在", "死", "有", "想", "爱", "恨", "伯", "是", "为", "乃", "能", "会", "愿", "肯", "敢", "要", "配", "上", "下", "进", "出", "回", "开", "过", "起", "来"]
-    const action = ask.match(/(?<action>.+)了[嘛吗](\?)?/);
+    ask = positionFlip(ask)
+    const singleWordAction = ["咬", "吞", "吐", "吮", "吸", "啃", "喝", "吃", "咀", "嚼", "噘", "嘟", "努", "撇", "看", "望", "瞥", "视", "盯", "瞧", "窥", "瞄", "眺", "瞪", "瞅", "搀", "抱", "搂", "扶", "捉", "擒", "掐", "推", "拿", "抽", "撕", "摘", "拣", "捡", "打", "播", "击", "捏", "撒", "按", "弹", "撞", "提", "扭", "捶", "持", "揍", "披", "捣", "搜", "托", "举", "拖", "擦", "敲", "挖", "抛", "掘", "抬", "插", "扔", "写", "抄", "抓", "捧", "掷", "撑", "摊", "倒", "摔", "劈", "画", "搔", "撬", "挥", "揽", "挡", "捺", "抚", "搡", "拉", "摸", "拍", "摇", "剪", "拎", "拔", "拧", "拨", "舞", "握", "攥", "退", "进", "奔", "跑", "赶", "趋", "遁", "逃", "立", "站", "跨", "踢", "跳", "走", "蹬", "窜", "说", "看", "走", "听", "笑", "拿", "跑", "吃", "唱", "喝", "敲", "坐", "盯", "踢", "闻", "摸", "在", "死", "有", "想", "爱", "恨", "伯", "是", "为", "乃", "能", "会", "愿", "肯", "敢", "要", "配", "上", "下", "进", "出", "回", "开", "过", "起", "来","喷"]
+    const action = ask.match(/(?<action>.+)(?<did>[了过])?[嘛吗](\?)?/);
     console.log(action);
-    if (action.groups.action.length == 2 && singleWordAction.includes(action.groups.action.slice(0, 1))) reply.choices = [`${action.groups.action.slice(0,1)}了`, `没${action.groups.action.slice(0,1)}`];
-    else if (action.groups.action.length == 2) reply.choices = [`${action.groups.action}了`, `没${action.groups.action}`];
-    else reply.choices = [`${action.groups.action}了`, `没有`];
+    let stick = {};
+    if (action.groups.did) {
+        stick = {
+            confirm: {
+                start: '',
+                end: '了',
+            },
+            deined: {
+                start: '没',
+                end: ''
+            }
+
+        }
+    } else {
+        stick = {
+            confirm: {
+                start: '',
+                end: '',
+            },
+            deined: {
+                start: '不',
+                end: ''
+            }
+
+        }
+    }
+    let choices = {}
+    if (action.groups.action.length == 2 && singleWordAction.includes(action.groups.action.slice(0, 1))) choices.c = choices.d = action.groups.action.slice(0, 1);
+    else if (action.groups.action.length == 2) choices.c = choices.d = action.groups.action;
+    else {
+        choices.c = action.groups.action;
+        choices.d = action.groups.action;
+    }
+    choices.c = `${stick.confirm.start}${choices.c}.${stick.confirm.end}`;
+    choices.d = `${stick.deined.start}${choices.d}.${stick.deined.end}`;
+    if (action.groups.did && action.groups.action.length > 2) choices.d = `没有`;
+    reply.choices = [choices.c, choices.d];
     return reply
 }
 
@@ -146,8 +185,8 @@ function findBuilder() {
             builder: AorB
         },
         {
-            matcher: (s) => s.match(/(.+)了[嘛吗](\?)?/),
-            builder: DidOrNot
+            matcher: (s) => s.match(/(?<action>.+)(?<did>[了过])?[嘛吗](\?)?/),
+            builder: DoOrNot
         }
     ];
 }
@@ -159,29 +198,30 @@ findBuilder.prototype.returnBuilderIfMatched = function(s) {
         return false;
     }
 }
-let readline = require('readline');
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+
 
 
 let b = new findBuilder();
-rl.on('line', function(line) {
-    let ask = line;
-    if (ask.substring(0, 1) === "!" || ask.substring(0, 1) === "！") {
-        try {
-            let str = ask.trim().substring(1);
-            let replyString = b.returnBuilderIfMatched(str);
-            console.log(replyString);
-            if (replyString) {
-                return console.log(replyString(str).toString());
-            }
-        } catch (ex) {
-            console.log(ex);
-        }
-    }
-});
+// let readline = require('readline');
+// const rl = readline.createInterface({
+//     input: process.stdin,
+//     output: process.stdout
+// });
+// rl.on('line', function(line) {
+//     let ask = line;
+//     if (ask.substring(0, 1) === "!" || ask.substring(0, 1) === "！") {
+//         try {
+//             let str = ask.trim().substring(1);
+//             let replyString = b.returnBuilderIfMatched(str);
+//             console.log(replyString);
+//             if (replyString) {
+//                 return console.log(replyString(str).toString());
+//             }
+//         } catch (ex) {
+//             console.log(ex);
+//         }
+//     }
+// });
 // Koishi插件名
 module.exports.name = 'exsperDoOrNot';
 
