@@ -9,30 +9,16 @@
 function LookForTheSame(s1, s2) {
     let s1length = s1.length;
     let s2length = s2.length;
-    let start = -1;
 
     if (s1length <= 0 || s2length <= 0) return -1;
 
-    // 当s2.length==1时单独讨论
-    if (s2length === 1) {
-        if (s1[s1length - 1] === s2[0]) return s1length - 1;
-        else return -1;
-    }
     // 寻找重复部分
-    for (let i = 0; i < s1length; ++i) {
-        //console.log(s1[i]);
-        if (s1[i] === s2[0]) {
-            start = i; // 找到相同点，开始核对
-            for (let j = 1; j < s2length; ++j) {
-                if (i + j >= s1length) { // s1到句末，核对结束
-                    return start;
-                }
-                else if (s1[i + j] !== s2[j]) { // 核对中出现不同字符，不是重复部分
-                    break;
-                }
-            }
-        }
-        // s2到句末，s1没到句末，不是重复部分
+    let length = s1length > s2length ? s2length : s1length;
+    while (length > 0) {
+        let s1end = s1.substring(s1length - length);
+        let s2start = s2.substring(0, length);
+        if (s1end === s2start) return s1length - length;
+        length -= 1;
     }
     return -1;
 }
@@ -106,9 +92,8 @@ function Reply(s) {
     if (notIndex + doLength + 1 < asklength) endString = ask.substring(notIndex + doLength + 1);
 
     // 细节处理
-    // 重复词开头为“！”视为恶意代码，不作回应
-    let doStringPrefix = doString.substring(0, 1);
-    if (doStringPrefix === "!" || doStringPrefix === "！") return "";
+    // 重复词有“！”视为恶意代码，不作回应（没人会用"学!code不学!code"聊天吧）
+    if (doString.indexOf("!") >= 0 || doString.indexOf("！") >= 0) return "";
     // 结束词包含疑问词/符号，取符号前的语句
     if (endString.length > 0) {
         let endStringRegex = /(.*?)(?=\?|？|!|！|,|，|\.|。|呢)+/;
@@ -128,7 +113,7 @@ function Reply(s) {
         else replyStringFix += replyString[i];
     }
 
-    // 随机
+    // 1/2 随机
     if (Math.random() < 0.5) replyStringFix = "不" + replyStringFix;
     return replyStringFix;
 }
